@@ -1,15 +1,3 @@
-<!-- <script setup lang="ts">
-import { inject } from "vue";
-
-const toggleAccordion = inject("toggleAccordion") as () => void;
-</script>
-
-<template>
-  <div @click="toggleAccordion">
-    <slot></slot>
-  </div>
-</template> -->
-
 <template>
   <button @click="toggleAccordion">
     <slot></slot>
@@ -17,7 +5,7 @@ const toggleAccordion = inject("toggleAccordion") as () => void;
 </template>
 
 <script setup lang="ts">
-import { inject, ref, watch } from "vue";
+import { inject, watch } from "vue";
 
 const id = inject<string>("itemId")!;
 const isOpen = inject<Ref<boolean>>("isOpen")!;
