@@ -5,7 +5,11 @@ interface Props {
   immediately?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  delayMs: 600,
+  as: "span",
+  immediately: true,
+});
 
 const srcExists = ref(false);
 const imageState = ref<"idle" | "loading" | "loaded" | "error">("idle");
@@ -62,7 +66,7 @@ provide("delayExpired", delayExpired);
 </script>
 
 <template>
-  <span :is="props.as">
+  <div :as="props.as">
     <slot></slot>
-  </span>
+  </div>
 </template>

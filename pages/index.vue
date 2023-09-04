@@ -5,7 +5,7 @@
       <BaseAvatar
         class="bg-gray-500 inline-flex h-[45px] w-[45px] select-none items-center justify-center overflow-hidden rounded-full align-middle"
         :delay-ms="5000"
-        :immediately="false"
+        :immediately="true"
         as="span"
       >
         <BaseAvatarImage
@@ -15,7 +15,7 @@
         />
         <BaseAvatarFallback
           class="leading-1 flex h-full w-full items-center justify-center bg-white text-[15px] font-medium"
-          as="span"
+          
         >
           JD
         </BaseAvatarFallback>
