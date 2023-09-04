@@ -1,13 +1,12 @@
 <script setup lang="ts">
 interface Props {
-  as: string;
   delayMs?: number;
   immediately?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   delayMs: 600,
-  as: "span",
+
   immediately: true,
 });
 
@@ -66,7 +65,7 @@ provide("delayExpired", delayExpired);
 </script>
 
 <template>
-  <div :as="props.as">
+  <div>
     <slot></slot>
   </div>
 </template>
