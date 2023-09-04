@@ -5,6 +5,7 @@ const handleImageState = inject("handleImageState") as (
 ) => void;
 const showFallback = inject("showFallback") as Ref<boolean>;
 const delayExpired = inject("delayExpired") as Ref<boolean>;
+const showImage = inject("showImage") as Ref<boolean>;
 
 interface Props {
   src?: string;
@@ -31,10 +32,8 @@ onMounted(() => {
     };
   }
 });
-const showImage = inject("showImage") as Ref<boolean>; // Προσθήκη εδώ
 </script>
 
 <template>
   <img :src="props.src" :alt="props.alt" v-if="props.src && showImage" />
-  <!-- Αλλαγή εδώ -->
 </template>
