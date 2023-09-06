@@ -46,6 +46,7 @@ onMounted(() => {
   }
 });
 
+
 watch(imageState, (newState) => {
   if (props.immediately && newState === "loaded") {
     showImage.value = true;
