@@ -14,7 +14,10 @@ const emit = defineEmits<{
 }>()
 
 const rootContext = inject(SCROLL_AREA_INJECTION_KEY)
-const scrollbarVisibleContext = inject(SCROLL_AREA_SCROLLBAR_VISIBLE_INJECTION_KEY)
+const scrollbarVisibleContext = inject(
+  SCROLL_AREA_SCROLLBAR_VISIBLE_INJECTION_KEY,
+)
+
 const scrollbarContext = inject(SCROLL_AREA_SCROLLBAR_INJECTION_KEY)
 
 export interface ScrollAreaScrollbarImplProps {
@@ -25,7 +28,6 @@ const { primitiveElement, currentElement: scrollbar } = usePrimitiveElement()
 const prevWebkitUserSelectRef = ref('')
 const rectRef = ref<DOMRect>()
 
-// Handle custom resize observation without vueuse
 const observeResize = (element:any, callback:any) => {
   const resizeObserver = new ResizeObserver(callback)
   resizeObserver.observe(element.value)
@@ -36,12 +38,13 @@ const observeResize = (element:any, callback:any) => {
 
 function handleDragScroll(event: MouseEvent) {
   if (rectRef.value) {
-    const x = event.clientX - rectRef.value.left
-    const y = event.clientY - rectRef.value.top
+    const x = event.clientX - rectRef.value?.left
+    const y = event.clientY - rectRef.value?.top
     emit('onDragScroll', { x, y })
   }
 }
 
+const prevUserSelectRef = ref('')
 function handlePointerDown(event: PointerEvent) {
   const mainPointer = 0
   if (event.button === mainPointer) {
@@ -49,16 +52,15 @@ function handlePointerDown(event: PointerEvent) {
     element.setPointerCapture(event.pointerId)
     rectRef.value = scrollbar.value!.getBoundingClientRect()
 
-    prevWebkitUserSelectRef.value = document.body.style.userSelect // Αλλαγή εδώ
-    document.body.style.userSelect = 'none' // Αλλαγή εδώ
+    // pointer capture doesn't prevent text selection, so we remove text selection manually when scrolling
+    prevUserSelectRef.value = document.body.style.userSelect
+    document.body.style.userSelect = 'none'
     if (rootContext?.viewport)
       rootContext.viewport.value!.style.scrollBehavior = 'auto'
 
     handleDragScroll(event)
   }
 }
-
-
 
 function handlePointerMove(event: PointerEvent) {
   handleDragScroll(event)
@@ -69,7 +71,7 @@ function handlePointerUp(event: PointerEvent) {
   if (element.hasPointerCapture(event.pointerId))
     element.releasePointerCapture(event.pointerId)
 
-  document.body.style.userSelect = prevWebkitUserSelectRef.value // Αλλαγή εδώ
+  document.body.style.userSelect = prevUserSelectRef.value
   if (rootContext?.viewport)
     rootContext.viewport.value!.style.scrollBehavior = ''
 
@@ -81,13 +83,23 @@ function handleWheel(event: WheelEvent) {
     return
   const element = event.target as HTMLElement
   const isScrollbarWheel = scrollbar.value?.contains(element)
-  const maxScrollPos = scrollbarVisibleContext.sizes.value.content - scrollbarVisibleContext.sizes.value.viewport
+  const maxScrollPos
+    = scrollbarVisibleContext.sizes.value.content
+    - scrollbarVisibleContext.sizes.value.viewport
   if (isScrollbarWheel)
     scrollbarVisibleContext.handleWheelScroll(event, maxScrollPos)
 }
 
+onMounted(() => {
+  document.addEventListener('wheel', handleWheel, { passive: false })
+})
+onUnmounted(() => {
+  document.removeEventListener('wheel', handleWheel)
+})
+
 function handleSizeChange() {
-  if (!scrollbar.value) return
+  if (!scrollbar.value)
+    return
   if (props.isHorizontal) {
     scrollbarVisibleContext?.handleSizeChange({
       content: rootContext?.viewport.value?.scrollWidth ?? 0,
@@ -105,36 +117,15 @@ function handleSizeChange() {
       viewport: rootContext?.viewport.value?.offsetHeight ?? 0,
       scrollbar: {
         size: scrollbar.value?.clientHeight ?? 0,
-        paddingStart: toInt(getComputedStyle(scrollbar.value!).paddingTop),
-        paddingEnd: toInt(getComputedStyle(scrollbar.value!).paddingBottom),
+        paddingStart: toInt(getComputedStyle(scrollbar.value!).paddingLeft),
+        paddingEnd: toInt(getComputedStyle(scrollbar.value!).paddingRight),
       },
     })
   }
 }
 
-let scrollbarObserver: ResizeObserver | null = null
-let contentObserver: ResizeObserver | null = null
-
-onMounted(() => {
-  scrollbarObserver = new ResizeObserver(handleSizeChange)
-  if (scrollbar.value) {
-    scrollbarObserver.observe(scrollbar.value)
-  }
-
-  contentObserver = new ResizeObserver(handleSizeChange)
-  if (rootContext?.content.value) {
-    contentObserver.observe(rootContext.content.value)
-  }
-
-  document.addEventListener('wheel', handleWheel, { passive: false })
-})
-
-onUnmounted(() => {
-  scrollbarObserver?.disconnect()
-  contentObserver?.disconnect()
-  document.removeEventListener('wheel', handleWheel)
-})
-
+observeResize(scrollbar, handleSizeChange)
+observeResize(rootContext?.content, handleSizeChange)
 </script>
 
 <template>

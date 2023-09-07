@@ -65,7 +65,10 @@ watchEffect(() => {
     }
     viewport.addEventListener('scroll', handleScroll)
   }
+  
 })
+
+
 </script>
 
 <template>
