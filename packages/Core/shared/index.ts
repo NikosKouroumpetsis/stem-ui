@@ -13,3 +13,4 @@ export { isValidVNodeElement } from "./isValidVNodeElement";
 export { useBodyScrollLock } from "./useBodyScrollLock";
 export { useTypeahead } from "./useTypeahead";
 export { createContext } from "./createContext";
+export { useVModel } from "./useVModel";

@@ -67,4 +67,3 @@ const dataState = computed<DataState>(() => {
     <slot />
   </Primitive>
 </template>
-./BaseTogleProps ../../Primitive
