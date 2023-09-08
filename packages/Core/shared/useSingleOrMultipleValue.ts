@@ -1,4 +1,5 @@
-import { watch, Ref, ref } from "vue";
+import { useVModel } from "./useVModel";
+import { type Ref, watch } from "vue";
 import type { Type } from "./types";
 
 function validateModelValue(
@@ -72,53 +73,38 @@ interface Props {
   type: Type;
   defaultValue?: string | string[];
 }
-
-type EmitType = (
-  event: "update:modelValue",
-  value: string | string[] | undefined
-) => void;
-
-export function useSingleOrMultipleValue<P extends Props>(
+export function useSingleOrMultipleValue<P extends Props, Name extends string>(
   props: P,
-  emits: EmitType
+  emits: (name: Name, ...args: any[]) => void
 ) {
-  const modelValue: Ref<string | string[] | undefined> = ref(
-    getDefaultValue(props)
-  );
+  const modelValue = useVModel(props, "modelValue", emits, {
+    defaultValue: getDefaultValue(props),
+    passive: true,
+  }) as Ref<string | string[] | undefined>;
 
   watch(
     () => [props.type, props.modelValue],
-    ([newType, newModelValue]) => {
-      const validatedValue = validateModelValue(
-        newType as Type,
-        newModelValue as string | string[] | undefined
-      );
-      if (modelValue.value !== validatedValue) {
+    () => {
+      const validatedValue = validateModelValue(props.type, modelValue.value);
+      if (modelValue.value !== validatedValue)
         modelValue.value = validatedValue;
-        emits("update:modelValue", validatedValue);
-      }
     },
     { immediate: true }
   );
 
   function changeModelValue(value: string) {
-    let newValue: string | string[] | undefined;
-
     if (props.type === "single") {
-      newValue = value === modelValue.value ? undefined : value;
+      modelValue.value = value === modelValue.value ? undefined : value;
     } else {
       const modelValueArray = (modelValue.value as string[]) || [];
-      const index = modelValueArray.indexOf(value);
-      if (index > -1) {
+      if (modelValueArray.includes(value)) {
+        const index = modelValueArray.findIndex((i) => i === value);
         modelValueArray.splice(index, 1);
       } else {
         modelValueArray.push(value);
       }
-      newValue = [...modelValueArray];
+      modelValue.value = modelValueArray;
     }
-
-    modelValue.value = newValue;
-    emits("update:modelValue", newValue);
   }
 
   return {

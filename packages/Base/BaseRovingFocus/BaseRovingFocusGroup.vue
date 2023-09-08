@@ -1,9 +1,4 @@
 <script lang="ts">
-export type BaseRovingFocusGroupEmits = {
-  entryFocus: [event: Event];
-  "update:currentTabStopId": [value: string | null | undefined];
-};
-
 interface RovingContextValue {
   orientation: Ref<Orientation>;
   dir: Ref<Direction>;
@@ -26,7 +21,7 @@ import { Direction, ENTRY_FOCUS, EVENT_OPTIONS, Orientation } from "./utils";
 import { focusFirst } from "./utils";
 import { useCollection } from "../../Core/shared";
 import { Primitive, usePrimitiveElement } from "../../Core/primitive";
-import { BaseRovingFocusGroupProps } from "./types";
+import { BaseRovingFocusGroupProps, BaseRovingFocusGroupEmits } from "./types";
 
 const props = withDefaults(defineProps<BaseRovingFocusGroupProps>(), {
   loop: false,

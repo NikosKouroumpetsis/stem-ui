@@ -25,3 +25,8 @@ export interface BaseRovingFocusItemProps extends PrimitiveProps {
   focusable?: boolean;
   active?: boolean;
 }
+
+export type BaseRovingFocusGroupEmits = {
+  entryFocus: [event: Event];
+  "update:currentTabStopId": [value: string | null | undefined];
+};
